@@ -5,13 +5,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.UUID;
 
 public interface StorageService {
 
-//    void init() throws IOException;
-
-    String save(@NotNull Long id,
-                @NotNull MultipartFile file) throws IOException;
+    Path save(@NotNull UUID id,
+              @NotNull MultipartFile file) throws Exception;
 
     Resource load(
             @NotNull String filePath,
@@ -21,9 +21,9 @@ public interface StorageService {
             @NotNull String filePath,
             @NotNull String fileName) throws IOException;
 
-    void cleanPath(Long id) throws IOException;
-        //Path load(@NotNull String filename);
+    void cleanPath(UUID id) throws IOException;
 
     //Stream<Path> loadAll();
     //void deleteAll();
+    //void init() throws IOException;
 }

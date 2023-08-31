@@ -3,13 +3,15 @@ package com.education.project.media.holder.mediaholder.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record MediaInfoResponse(
 
         @Schema(description = "File ID",
                 example = "1525430455740003903")
-        Long id,
+        UUID id,
 
+        //todo: change description
         @Schema(description =
                 "Upload time (milliseconds after 1970.01.01 Greenwich)",
                 example = "1525430455740003903")
@@ -33,9 +35,9 @@ public record MediaInfoResponse(
 
         @Schema(description = "File name",
                 example = "whistle12345.wav")
-        String file_name,
+        String fileName,
 
         @Schema(description = "File size",
-                example = "")
-        long file_size
+                example = "10242401")
+        long fileSize
 ) {}

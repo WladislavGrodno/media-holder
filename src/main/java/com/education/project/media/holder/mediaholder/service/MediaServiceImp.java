@@ -3,31 +3,29 @@ package com.education.project.media.holder.mediaholder.service;
 import com.education.project.media.holder.mediaholder.dto.request.MediaInfoRequest;
 import com.education.project.media.holder.mediaholder.dto.request.MediaRequest;
 import com.education.project.media.holder.mediaholder.dto.response.MediaInfoResponse;
-import com.education.project.media.holder.mediaholder.dto.response.MediaResponse;
+
 import com.education.project.media.holder.mediaholder.mapper.MediaMapper;
 import com.education.project.media.holder.mediaholder.model.Media;
 import com.education.project.media.holder.mediaholder.repository.MediaRepository;
-import jakarta.validation.Valid;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
-public class MediaServiceImp implements MediaService{
+public class MediaServiceImp implements MediaService {
 
     @Autowired
     private MediaRepository mediaRepository;
@@ -38,70 +36,33 @@ public class MediaServiceImp implements MediaService{
     @Qualifier("storageServiceImp")
     private StorageService storageService;
 
-    //private StorageServiceImp storageService = new StorageServiceImp();
 
     @Override
     public ResponseEntity<MediaInfoResponse> createMedia(
             @NotNull MediaRequest mediaRequest)
-            throws IOException {
+            throws Exception {
 
         MultipartFile file = mediaRequest.fileBody();
-
-        log.info("{\"add file\": {" +
-                        "\"media name\": {}," +
-                        "\"media description\": {}," +
-                        "\"media type\": {}," +
-                        "\"file type\": {}," +
-                        "\"file name\": {}," +
-                        "\"file original name\": {}," +
-                        "\"file size\": {}" +
-                        "}}",
-                mediaRequest.name(),
-                mediaRequest.description(),
-                mediaRequest.type(),
-                file.getContentType(), file.getName(),
-                file.getOriginalFilename(), file.getSize()
-        );
+        log.info("{\"add file\": {\"file size\": \"{}\"}}", file.getSize());
 
         Media mediaResult = mediaRepository.save(
-                mediaMapper.toMedia(mediaRequest));
+                mediaMapper.toMedia(
+                        mediaRequest,
+                        file.getOriginalFilename(),
+                        file.getSize()));
 
         mediaResult.setFilePath(
-                storageService.save(mediaResult.getId(), file));
+                storageService.save(mediaResult.getId(), file).toString());
 
         return new ResponseEntity<>(
                 mediaMapper.toDtoInfo(mediaRepository.save(mediaResult)),
                 HttpStatus.OK);
     }
 
-    /*
-    @Override
-    public ResponseEntity<MediaResponse> getMediaById(
-            @NotNull Long id)
-            throws Exception {
-        log.info("{\"return file\": {\"id\": {}}}", id);
-
-        //        boolean jpg = true;
-//    MediaType contentType = jpg ? MediaType..IMAGE_JPEG : MediaType.IMAGE_PNG;
-
-        Optional<Media> mediaOptional = mediaRepository.findById(id);
-        if (mediaOptional.isEmpty()) throw new Exception("NOT FOUND");
-
-        Media media = mediaOptional.get();
-
-        Resource resourceMedia = storageService.load(
-                media.getFilePath(), media.getFileName());
-
-        MediaResponse mediaResponse = mediaMapper.toDto(
-                media, resourceMedia);
-
-        return new ResponseEntity<>(mediaResponse, HttpStatus.OK);
-    }
-     */
 
     @Override
     public ResponseEntity<Resource> getMediaById(
-            @NotNull Long id)
+            @NotNull UUID id)
             throws Exception {
         log.info("{\"return file\": {\"id\": {}}}", id);
 
@@ -112,37 +73,61 @@ public class MediaServiceImp implements MediaService{
         return new ResponseEntity<>(
                 storageService.load(media.getFilePath(), media.getFileName()),
                 HttpStatus.OK);
-
     }
 
     @Override
     public ResponseEntity<MediaInfoResponse> getMediaInfoById(
-            @NotNull Long id)
+            @NotNull UUID id)
             throws Exception {
         log.info("{\"return file info\": {\"id\": {}}}", id);
 
         Optional<Media> mediaOptional = mediaRepository.findById(id);
-        if (mediaOptional.isEmpty()) throw new Exception(
-                "MEDIA NOT FOUND ON THIS SERVER");
+        if (mediaOptional.isEmpty()) throw new Exception("NOT FOUND");
 
         return new ResponseEntity<>(
                 mediaMapper.toDtoInfo(mediaOptional.get()),
                 HttpStatus.OK);
-
     }
 
     @Override
     public ResponseEntity<MediaInfoResponse> updateMediaById(
-            @NotNull Long id,
-            @NotNull MediaRequest media)
+            @NotNull UUID id,
+            @NotNull MultipartFile file)
             throws Exception {
         log.info("{\"update file\": {\"id\": {}}}", id);
-        return null;
+
+        String newFileName = file.getOriginalFilename();
+        Long newFileSize = file.getSize();
+        if (newFileName == null) throw new Exception("EMPTY FILE NAME");
+
+        Optional<Media> mediaOptional = mediaRepository.findById(id);
+        if (mediaOptional.isEmpty()) throw new Exception("NOT FOUND");
+        Media media = mediaOptional.get();
+
+        Path basePath = storageService.save(id, file);
+
+        if (!Files.exists(basePath.resolve(newFileName)))
+            throw new Exception("FILE NOT ACCEPTED");
+
+        String oldFileName = media.getFileName();
+        Long oldFileSize = media.getFileSize();
+
+        media.setFileName(newFileName);
+        media.setFileSize(newFileSize);
+        mediaRepository.save(media);
+
+        Files.delete(basePath.resolve(oldFileName));
+
+        log.info("file size: old = {}, new = {}", oldFileSize, newFileSize);
+
+        return new ResponseEntity<>(
+                mediaMapper.toDtoInfo(media),
+                HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<MediaInfoResponse> updateMediaInfoById(
-            @NotNull Long id,
+            @NotNull UUID id,
             @NotNull MediaInfoRequest mediaInfo)
             throws Exception {
         log.info("{\"update file info\": {\"id\": {}}}", id);
@@ -157,27 +142,10 @@ public class MediaServiceImp implements MediaService{
         return new ResponseEntity<>(
                 mediaMapper.toDtoInfo(mediaRepository.save(media)),
                 HttpStatus.OK);
-
-        /*
-        @Override
-    public ResponseEntity<CarResponse> carUpdate(
-            @NotNull Long idc,
-            @NotNull CarRequest car)
-            throws Exception {
-        log.info("{\"updateCar\": {\"id\": {}, \"car\": \"{}\"}}", idc, car);
-        Optional<Car> carControl = carRepository.findById(idc);
-        if (carControl.isEmpty()) throw new Exception("NOT FOUND");
-        return new ResponseEntity<>(
-                mapper.toDto(carRepository.save(mapper.toCar(idc, car))),
-                HttpStatus.OK);
-    }
-
-         */
-
     }
 
     @Override
-    public void eraseMedia(@NotNull Long id) throws Exception {
+    public void eraseMedia(@NotNull UUID id) throws Exception {
         log.info("{\"delete file\": {\"id\": {}}}", id);
 
         Optional<Media> mediaOptional = mediaRepository.findById(id);
@@ -189,8 +157,10 @@ public class MediaServiceImp implements MediaService{
             mediaRepository.save(media);
         }
 
-        if (storageService.delete(media.getFilePath(), media.getFileName()))
-            storageService.cleanPath(media.getId());
-
+        if (storageService.delete(media.getFilePath(), media.getFileName())) {
+            storageService.cleanPath(id);
+            mediaRepository.deleteById(id);
+        }
+        throw new Exception("OPERATION SUCCESSFUL");
     }
 }

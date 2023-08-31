@@ -5,12 +5,14 @@ import com.education.project.media.holder.mediaholder.dto.response.MediaInfoResp
 import com.education.project.media.holder.mediaholder.dto.response.MediaResponse;
 import com.education.project.media.holder.mediaholder.model.Media;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 @Mapper(componentModel = "spring")
 public interface MediaMapper {
 
+    /*
     default MediaResponse toDto(Media media, Resource fileBody){
         return new MediaResponse(
                 media.getId(),
@@ -24,7 +26,27 @@ public interface MediaMapper {
         );
     };
 
+     */
 
+    @Mapping(source = "name", target = "fileName")
+    @Mapping(source = "size", target = "fileSize")
+    Media toMedia(Media media, String name, Long size);
+
+    MediaInfoResponse toDtoInfo(Media media);
+
+    /*{
+        return new MediaInfoResponse(
+                media.getId(),
+                media.getUploadTime(),
+                media.getName(),
+                media.getDescription(),
+                media.getType(),
+                media.getFileName(),
+                media.getFileSize()
+        );
+    }*/
+
+    /*
     default MediaInfoResponse toDtoInfo(Media media){
         return new MediaInfoResponse(
                 media.getId(),
@@ -37,6 +59,23 @@ public interface MediaMapper {
                 );
     }
 
+     */
+
+/*
+    @Mapping(target = "fileName",
+            expression = "java(request.fileBody().getOriginalFilename())")
+    @Mapping(target = "fileSize",
+            expression = "java(request.fileBody().getSize())")
+
+ */
+    //@Mapping(source = "request.file.size", target = "file_size")
+    //@Mapping(source = "request.file.originalFilename", target = "file_name")
+    // @Mapping(source = "request.file.size", target = "file_size")
+    //@Mapping(source = "request.type", target = "specialization")
+    //@Mapping(source = "request.name", target = "specialization")
+    Media toMedia(MediaRequest request, String fileName, Long fileSize);
+
+    /*
     default Media toMedia(MediaRequest request){
         MultipartFile file = request.fileBody();
 
@@ -46,5 +85,6 @@ public interface MediaMapper {
                 file.getOriginalFilename(), file.getSize(), ""
         );
     }
+     */
 
 }

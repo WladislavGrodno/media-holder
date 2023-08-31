@@ -23,8 +23,9 @@ public record MediaRequest(
         @NotNull(message = "Null value type is denied")
         int type,
 
-        @Schema(description = "Media file",
-                example = "2")
+        @Schema(description = "Media file"
+                //, example = ""
+        )
         @NotNull(message = "Null file is denied")
         MultipartFile fileBody
 ) {}

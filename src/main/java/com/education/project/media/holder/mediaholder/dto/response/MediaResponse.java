@@ -4,13 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.core.io.Resource;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record MediaResponse(
 
         @Schema(description = "File ID",
                 example = "1525430455740003903")
-        Long id,
+        UUID id,
 
         @Schema(description =
                 "Upload time (milliseconds after 1970.01.01 Greenwich)",

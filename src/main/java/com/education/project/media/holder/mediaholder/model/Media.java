@@ -16,6 +16,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,9 +26,10 @@ import java.time.LocalDateTime;
 @Table(name = "media")
 public class Media {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", insertable = false, updatable = false)
-    private Long id;
+    private UUID id;
 
     @Column(name = "upload_time", insertable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
