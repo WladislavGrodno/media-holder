@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 //import org.springframework.data.jpa.repository.Temporal;
 
 import java.time.Instant;
@@ -32,13 +33,9 @@ public class Media {
     private UUID id;
 
     @Column(name = "upload_time", insertable = false, updatable = false)
+    @CreationTimestamp
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@GeneratedValue(strategy = GenerationType.AUTO)
-    @Temporal(TemporalType.TIMESTAMP)
-    //private Object uploadTime;
     private Instant uploadTime;
-    //private Timestamp uploadTime;
-    //private Long uploadTime;
 
     @Column(name = "name", nullable = false)
     private String name = "";

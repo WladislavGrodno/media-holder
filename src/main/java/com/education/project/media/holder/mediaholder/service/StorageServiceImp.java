@@ -59,7 +59,6 @@ public class StorageServiceImp implements StorageService {
     public Resource load(String filePath,
                          String fileName) throws Exception {
         Path file = pathChain.path(filePath, fileName);
-        //Path file = this.storageRootPath.resolve(fileName).normalize();
         Resource resource = new UrlResource(file.toUri());
         if (resource.exists() || resource.isReadable()) return resource;
         throw new Exception("Could not find file");
