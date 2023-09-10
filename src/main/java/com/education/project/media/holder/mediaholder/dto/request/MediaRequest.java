@@ -10,12 +10,12 @@ public record MediaRequest(
         @Schema(description = "File nickname",
                 example = "Media1")
         @NotNull(message = "Blank value name is denied")
-        @Size(max = 128)
+        @Size(max = 256)
         String name,
 
         @Schema(description = "File description",
                 example = "Very interesting media")
-        @Size(max = 128)
+        @Size(max = 512)
         String description,
 
         @Schema(description = "Type of media: 1 - IMG, 2 - AUD, 3 - VID",
@@ -23,8 +23,8 @@ public record MediaRequest(
         @NotNull(message = "Null value type is denied")
         int type,
 
-        @Schema(description = "Media file"
-                //, example = ""
+        @Schema(description = "Media file",
+                example = "MultipartFile X3 insert in swagger"
         )
         @NotNull(message = "Null file is denied")
         MultipartFile fileBody
