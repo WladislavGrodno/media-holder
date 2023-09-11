@@ -2,12 +2,12 @@ package com.education.project.media.holder.mediaholder.mapper;
 
 import com.education.project.media.holder.mediaholder.dto.request.MediaRequest;
 import com.education.project.media.holder.mediaholder.dto.response.MediaInfoResponse;
-import com.education.project.media.holder.mediaholder.dto.response.MediaResponse;
 import com.education.project.media.holder.mediaholder.model.Media;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.core.io.Resource;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MediaMapper {
@@ -33,6 +33,9 @@ public interface MediaMapper {
     Media toMedia(Media media, String name, Long size);
 
     MediaInfoResponse toDtoInfo(Media media);
+
+//    Page<MediaInfoResponse> toDtoInfo(Page<Media> media);
+    List<MediaInfoResponse> toDtoInfo(List<Media> media);
 
     /*{
         return new MediaInfoResponse(

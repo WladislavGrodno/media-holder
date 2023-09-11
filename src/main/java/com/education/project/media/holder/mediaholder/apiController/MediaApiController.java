@@ -1,5 +1,7 @@
 package com.education.project.media.holder.mediaholder.apiController;
 
+import com.education.project.media.holder.mediaholder.model.DataPage;
+import com.education.project.media.holder.mediaholder.model.MediaSearchCriteria;
 import com.education.project.media.holder.mediaholder.service.MediaService;
 import com.education.project.media.holder.mediaholder.dto.request.MediaInfoRequest;
 import com.education.project.media.holder.mediaholder.dto.request.MediaRequest;
@@ -14,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -172,4 +175,20 @@ public class MediaApiController {
     public void deleteMediaById(@Valid @PathVariable UUID id) throws Exception {
         mediaService.eraseMedia(id);
     }
+
+    @GetMapping("/media-info-list")
+    @Operation(
+            summary = "Returns selected media info",
+            description = "Returns selected media info")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @ApiResponse(responseCode = "404", description = "The database is empty")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
+    public ResponseEntity<Page<MediaInfoResponse>> getAlienCars(
+            @Valid @RequestBody DataPage page,
+            @Valid @RequestBody MediaSearchCriteria searchCriteria){
+        return mediaService.mediaListCustomRead(page, searchCriteria);
+    }
+
+
 }

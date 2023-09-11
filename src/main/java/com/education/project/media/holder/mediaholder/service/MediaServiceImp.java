@@ -5,7 +5,10 @@ import com.education.project.media.holder.mediaholder.dto.request.MediaRequest;
 import com.education.project.media.holder.mediaholder.dto.response.MediaInfoResponse;
 
 import com.education.project.media.holder.mediaholder.mapper.MediaMapper;
+import com.education.project.media.holder.mediaholder.model.DataPage;
 import com.education.project.media.holder.mediaholder.model.Media;
+import com.education.project.media.holder.mediaholder.model.MediaSearchCriteria;
+import com.education.project.media.holder.mediaholder.repository.MediaCriteriaRepository;
 import com.education.project.media.holder.mediaholder.repository.MediaRepository;
 
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,12 +34,31 @@ public class MediaServiceImp implements MediaService {
     @Autowired
     private MediaRepository mediaRepository;
     @Autowired
+    private MediaCriteriaRepository mediaCriteriaRepository;
+    @Autowired
     private MediaMapper mediaMapper;
 
     @Autowired
     @Qualifier("storageServiceImp")
     private StorageService storageService;
 
+
+    @Override
+    public ResponseEntity<Page<MediaInfoResponse>> mediaListCustomRead(
+            @NotNull DataPage page,
+            @NotNull MediaSearchCriteria searchCriteria
+    ){
+        log.info("{\"get media info list\": {" +
+                        "\"page\": \"{}," +
+                        "\"search criteria\": \"{}" +
+                        "\"}}", page, searchCriteria);
+
+        return new ResponseEntity<>(
+                mediaCriteriaRepository.findAllWithFilters(
+                        page, searchCriteria),
+                HttpStatus.OK
+        );
+    }
 
     @Override
     public ResponseEntity<MediaInfoResponse> createMedia(
